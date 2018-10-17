@@ -1,0 +1,8 @@
+version: '3'
+services:
+  php:
+    build: .
+    working_dir: /var/www
+    volumes:
+        - ./conf/php.ini:/etc/php/7.0/fpm/php.ini
+        - ./www:/var/www/html

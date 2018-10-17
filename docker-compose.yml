@@ -1,0 +1,48 @@
+version: '3'
+services:
+
+  web:
+    image: nginx
+    volumes:
+      - "./conf/default.conf:/etc/nginx/conf.d/default.conf"
+      - "./conf/nginx.conf:/etc/nginx/nginx.conf"
+      - "./www:/var/www/html/"
+    ports:
+      - "8000:80"
+    depends_on:
+      - php
+      - mysqldb
+  php:
+    build: .
+    working_dir: /var/www
+    volumes:
+        - ./conf/php.ini:/etc/php/7.0/fpm/php.ini
+        - ./www:/var/www/html
+
+  myadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - "8080:80"
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=${MYSQL_HOST}
+        restart: always
+        depends_on:
+            - mysqldb
+  mysqldb:
+        image: mariadb:${MYSQL_VERSION}
+        container_name: ${MYSQL_HOST}
+        restart: always
+        env_file:
+            - ".env"
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./data/db/mysql:/var/lib/mysql
+            - ./conf/my.conf:/etc/mysql/conf.conf
